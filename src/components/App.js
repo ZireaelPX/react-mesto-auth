@@ -47,7 +47,7 @@ function App() {
                 .then(res => {
                     setLoggedIn(true);
                     setEmail(res.data.email)
-                    history.push('/main');
+                    history.push('/');
                 })
                 .catch((err) => {
                     console.log(err + ': ошибка авторизации')
@@ -71,7 +71,7 @@ function App() {
                 localStorage.setItem("jwt", res.token);
                 setLoggedIn(true);
                 setEmail(email);
-                history.push('/main');
+                history.push('/');
             })
             .catch(err => {
                 console.log(err + ': ошибка авторизации')
@@ -186,7 +186,7 @@ function App() {
                         <Header route="sign-in" nameLink="Авторизация"/>
                         <Register onRegister={onRegister}/>
                     </Route>
-                    <Route exact path="/main">
+                    <Route exact path="/">
                         <Header onOut={onOut} email={email} nameLink="Выход"/>
                         <ProtectedRoute
                             onEditProfile={handleEditProfileClick}
@@ -202,7 +202,7 @@ function App() {
                         <Footer/>
                     </Route>
                     <Route exact path="*">
-                        {loggedIn ? <Redirect to="/main"/> : <Redirect to="/sign-in"/>}
+                        {loggedIn ? <Redirect to="/"/> : <Redirect to="/sign-in"/>}
                     </Route>
                 </Switch>
 
