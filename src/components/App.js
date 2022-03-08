@@ -45,8 +45,8 @@ function App() {
             const jwt = localStorage.getItem('jwt');
             mestoAuth.getToken(jwt)
                 .then(res => {
-                    console.log(res);
                     setLoggedIn(true);
+                    setEmail(res.data.email)
                     history.push('/main');
                 })
                 .catch((err) => {
@@ -58,8 +58,6 @@ function App() {
     function onRegister(email, password) {
         mestoAuth.register(email, password)
             .then(res => {
-                console.log('Успешная регистрация');
-                console.log(res);
                 history.push('/sign-in');
             })
             .catch(err => {
@@ -70,7 +68,6 @@ function App() {
     function onLogin(email, password) {
         mestoAuth.login(email, password)
             .then(res => {
-                console.log('Успешная авторизация')
                 localStorage.setItem("jwt", res.token);
                 setLoggedIn(true);
                 setEmail(email);
@@ -204,7 +201,7 @@ function App() {
                         />
                         <Footer/>
                     </Route>
-                    <Route exact path="/">
+                    <Route exact path="*">
                         {loggedIn ? <Redirect to="/main"/> : <Redirect to="/sign-in"/>}
                     </Route>
                 </Switch>
