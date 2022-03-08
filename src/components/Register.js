@@ -35,4 +35,4 @@ const Register = ({onRegister}) => {
     )
 }
 
-export default withRouter(Register);
+export default Register;
