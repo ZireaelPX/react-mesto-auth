@@ -1,22 +1,33 @@
 import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import ImagePopup from "./ImagePopup";
 
-import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import {CurrentUserContext} from "../contexts/CurrentUserContext";
 import api from "../utils/api";
 import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
+import {Redirect, Route, Switch, useHistory, withRouter} from "react-router-dom";
+import Login from "./Login";
+import Register from "./Register";
+import ProtectedRoute from "./ProtectedRoute";
+
+import * as mestoAuth from "../utils/mestoAuth";
 
 function App() {
     const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
     const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
     const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
     const [selectedCard, setSelectedCard] = useState(null);
-    const [currentUser, setCurrentUser] = useState({});
     const [cards, setCards] = useState([]);
+
+    const [currentUser, setCurrentUser] = useState({});
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [email, setEmail] = useState("");
+
+    let history = useHistory();
 
     useEffect((() => {
         Promise.all([api.getInitialCards(), api.getUserInfo()])
@@ -28,6 +39,55 @@ function App() {
                 console.error("Что-то пошло не так: " + err);
             });
     }), []);
+
+    useEffect(() => {
+        if (localStorage.getItem('jwt')) {
+            const jwt = localStorage.getItem('jwt');
+            mestoAuth.getToken(jwt)
+                .then(res => {
+                    console.log(res);
+                    setLoggedIn(true);
+                    history.push('/main');
+                })
+                .catch((err) => {
+                    console.log(err + ': ошибка авторизации')
+                });
+        }
+    }, []);
+
+    function onRegister(email, password) {
+        mestoAuth.register(email, password)
+            .then(res => {
+                console.log('Успешная регистрация');
+                console.log(res);
+                history.push('/sign-in');
+            })
+            .catch(err => {
+                console.log(err + ': ошибка регистрации')
+            })
+    }
+
+    function onLogin(email, password) {
+        mestoAuth.login(email, password)
+            .then(res => {
+                console.log('Успешная авторизация')
+                localStorage.setItem("jwt", res.token);
+                setLoggedIn(true);
+                setEmail(email);
+                history.push('/main');
+            })
+            .catch(err => {
+                console.log(err + ': ошибка авторизации')
+            })
+    }
+
+
+    function onOut() {
+        setLoggedIn(false);
+        localStorage.removeItem('jwt');
+        setEmail("");
+        history.push("/sign-in");
+    }
 
     function handleUpdateUser(data) {
         api.updateUserInfo(data)
@@ -120,23 +180,42 @@ function App() {
     return (
         <CurrentUserContext.Provider value={currentUser}>
             <div className="root__block">
-                <Header />
-                <Main
-                    onEditProfile={handleEditProfileClick}
-                    onAddPlace={handleAddPlaceClick}
-                    onEditAvatar={handleEditAvatarClick}
-                    onCardClick={handleCardClick}
-                    onLikeCard={handleCardLike}
-                    onCardDelete={handleCardDelete}
-                    cards={cards}
-                />
-                <Footer />
+                <Switch>
+                    <Route path="/sign-in">
+                        <Header route="sign-up" nameLink="Регистрация"/>
+                        <Login onLogin={onLogin}/>
+                    </Route>
+                    <Route path="/sign-up">
+                        <Header route="sign-in" nameLink="Авторизация"/>
+                        <Register onRegister={onRegister}/>
+                    </Route>
+                    <Route exact path="/main">
+                        <Header onOut={onOut} email={email} nameLink="Выход"/>
+                        <ProtectedRoute
+                            onEditProfile={handleEditProfileClick}
+                            onAddPlace={handleAddPlaceClick}
+                            onEditAvatar={handleEditAvatarClick}
+                            onCardClick={handleCardClick}
+                            onLikeCard={handleCardLike}
+                            onCardDelete={handleCardDelete}
+                            cards={cards}
+                            loggedIn={loggedIn}
+                            component={Main}
+                        />
+                        <Footer/>
+                    </Route>
+                    <Route exact path="/">
+                        {loggedIn ? <Redirect to="/main"/> : <Redirect to="/sign-in"/>}
+                    </Route>
+                </Switch>
+
+
             </div>
 
-            <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} />
+            <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser}/>
             <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups}
-                onUpdateAvatar={handleUpdateAvatar} />
-            <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddNewCard={handleNewCard} />
+                             onUpdateAvatar={handleUpdateAvatar}/>
+            <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddNewCard={handleNewCard}/>
 
             <ImagePopup
                 card={selectedCard}
@@ -149,7 +228,7 @@ function App() {
                     <form name="profile-form" action="#" className="popup__form">
                         <button className="popup__submit-btn popup__delete-btn" type="submit">Да</button>
                     </form>
-                    <button className="popup__close-btn" type="button" />
+                    <button className="popup__close-btn" type="button"/>
                 </div>
             </div>
         </CurrentUserContext.Provider>
@@ -157,3 +236,4 @@ function App() {
 }
 
 export default App;
+
