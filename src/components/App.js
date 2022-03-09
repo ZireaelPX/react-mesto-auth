@@ -9,23 +9,28 @@ import api from "../utils/api";
 import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
-import {Redirect, Route, Switch, useHistory, withRouter} from "react-router-dom";
+import {Redirect, Route, Switch, useHistory} from "react-router-dom";
 import Login from "./Login";
 import Register from "./Register";
 import ProtectedRoute from "./ProtectedRoute";
 
 import * as mestoAuth from "../utils/mestoAuth";
+import InfoTooltip from "./InfoTooltip";
 
 function App() {
     const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
     const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
     const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+    const [isInfoTooltip, setIsInfoTooltip] = useState(false);
+
     const [selectedCard, setSelectedCard] = useState(null);
     const [cards, setCards] = useState([]);
 
     const [currentUser, setCurrentUser] = useState({});
     const [loggedIn, setLoggedIn] = useState(false);
     const [email, setEmail] = useState("");
+
+    const [isStatusRegister, setIsStatusRegister] = useState(null);
 
     let history = useHistory();
 
@@ -58,11 +63,14 @@ function App() {
     function onRegister(email, password) {
         mestoAuth.register(email, password)
             .then(res => {
+                setIsStatusRegister(true);
                 history.push('/sign-in');
             })
             .catch(err => {
+                setIsStatusRegister(false);
                 console.log(err + ': ошибка регистрации')
             })
+            .finally(handleInfoTooltip)
     }
 
     function onLogin(email, password) {
@@ -74,6 +82,8 @@ function App() {
                 history.push('/');
             })
             .catch(err => {
+                setIsStatusRegister(false);
+                handleInfoTooltip();
                 console.log(err + ': ошибка авторизации')
             })
     }
@@ -167,10 +177,15 @@ function App() {
         setSelectedCard(card);
     }
 
+    function handleInfoTooltip(){
+        setIsInfoTooltip(true);
+    }
+
     function closeAllPopups() {
         setIsAddPlacePopupOpen(false);
         setIsEditProfilePopupOpen(false);
         setIsEditAvatarPopupOpen(false);
+        setIsInfoTooltip(false);
         setSelectedCard(null);
     }
 
@@ -187,7 +202,8 @@ function App() {
                         <Register onRegister={onRegister}/>
                     </Route>
                     <Route exact path="/">
-                        <Header onOut={onOut} email={email} nameLink="Выход"/>
+                        <Header onOut={onOut} email={email} nameLink="Выход" isLogin={loggedIn}/>
+
                         <ProtectedRoute
                             onEditProfile={handleEditProfileClick}
                             onAddPlace={handleAddPlaceClick}
@@ -209,15 +225,29 @@ function App() {
 
             </div>
 
-            <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser}/>
-            <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups}
-                             onUpdateAvatar={handleUpdateAvatar}/>
-            <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddNewCard={handleNewCard}/>
-
+            <EditProfilePopup
+                isOpen={isEditProfilePopupOpen}
+                onClose={closeAllPopups}
+                onUpdateUser={handleUpdateUser}/>
+            <EditAvatarPopup
+                isOpen={isEditAvatarPopupOpen}
+                onClose={closeAllPopups}
+                onUpdateAvatar={handleUpdateAvatar}/>
+            <AddPlacePopup
+                isOpen={isAddPlacePopupOpen}
+                onClose={closeAllPopups}
+                onAddNewCard={handleNewCard}/>
             <ImagePopup
                 card={selectedCard}
                 onClose={closeAllPopups}
             />
+            <InfoTooltip
+                name="status"
+                isOpen={isInfoTooltip}
+                onClose={closeAllPopups}
+                isStatusRegister={isStatusRegister}
+            />
+
 
             <div className="popup popup_card-delete">
                 <div className="popup__container">

@@ -17,7 +17,6 @@ const Login = ({onLogin}) => {
         onLogin(email, password);
     }
 
-
     return (
         <section className="login">
             <h2 className="login__title">Вход</h2>
