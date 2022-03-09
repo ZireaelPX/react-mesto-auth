@@ -34,20 +34,10 @@ function App() {
 
     let history = useHistory();
 
-    useEffect((() => {
-        Promise.all([api.getInitialCards(), api.getUserInfo()])
-            .then(([card, userInfo]) => {
-                setCards(card);
-                setCurrentUser(userInfo);
-            })
-            .catch((err) => {
-                console.error("Что-то пошло не так: " + err);
-            });
-    }), []);
 
     useEffect(() => {
-        if (localStorage.getItem('jwt')) {
-            const jwt = localStorage.getItem('jwt');
+        const jwt = localStorage.getItem('jwt');
+        if (jwt) {
             mestoAuth.getToken(jwt)
                 .then(res => {
                     setLoggedIn(true);
@@ -59,6 +49,20 @@ function App() {
                 });
         }
     }, []);
+
+    useEffect((() => {
+        if(loggedIn){
+            console.log('Получение данных')
+            Promise.all([api.getInitialCards(), api.getUserInfo()])
+                .then(([card, userInfo]) => {
+                    setCards(card);
+                    setCurrentUser(userInfo);
+                })
+                .catch((err) => {
+                    console.error("Что-то пошло не так: " + err);
+                });
+        }
+    }), [loggedIn]);
 
     function onRegister(email, password) {
         mestoAuth.register(email, password)
@@ -177,7 +181,7 @@ function App() {
         setSelectedCard(card);
     }
 
-    function handleInfoTooltip(){
+    function handleInfoTooltip() {
         setIsInfoTooltip(true);
     }
 
