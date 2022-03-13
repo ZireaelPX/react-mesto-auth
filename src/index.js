@@ -7,9 +7,12 @@ import {BrowserRouter, HashRouter} from "react-router-dom";
 
 ReactDOM.render(
     <React.StrictMode>
-        <HashRouter>
+        {/*<HashRouter>*/}
+        {/*    <App/>*/}
+        {/*</HashRouter>*/}
+        <BrowserRouter basename="/react-mesto-auth">
             <App/>
-        </HashRouter>
+        </BrowserRouter>
     </React.StrictMode>,
     document.getElementById('root')
 );
