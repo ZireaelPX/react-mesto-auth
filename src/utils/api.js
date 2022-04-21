@@ -30,7 +30,7 @@ class Api {
 	}
 
 	updateUserInfo(body) {
-		const url = this.baseUrl + '/users/me ';
+		const url = this.baseUrl + '/users/me';
 		return fetch(url, {
 			method: 'PATCH',
 			headers: this.headers,

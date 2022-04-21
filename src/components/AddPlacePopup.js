@@ -8,7 +8,6 @@ function EditProfilePopup({isOpen, onClose, onAddNewCard}) {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(()=> {
-        setIsLoading(false);
         setTitle('');
         setLink('')
     }, [isOpen]);
@@ -29,6 +28,7 @@ function EditProfilePopup({isOpen, onClose, onAddNewCard}) {
             title,
             link
         });
+        setIsLoading(false);
     }
 
     return (
