@@ -9,6 +9,7 @@ function EditProfilePopup({isOpen, onClose, onUpdateAvatar}) {
 
     useEffect(() => {
         avatar.current.value = '';
+        setIsLoading(false);
     }, [isOpen]);
 
     function handleSubmit(e) {
@@ -20,7 +21,6 @@ function EditProfilePopup({isOpen, onClose, onUpdateAvatar}) {
             avatar: avatar.current.value,
         })
 
-        setIsLoading(false);
     }
 
     return (

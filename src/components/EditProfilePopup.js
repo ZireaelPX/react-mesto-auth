@@ -14,6 +14,7 @@ function EditProfilePopup({isOpen, onClose, onUpdateUser}) {
         if(isOpen){
             setName(currentUser.name);
             setDescription(currentUser.about);
+            setIsLoading(false);
         }
     }, [isOpen, currentUser]);
 
@@ -29,8 +30,9 @@ function EditProfilePopup({isOpen, onClose, onUpdateUser}) {
         evt.preventDefault();
 
         setIsLoading(true);
+
         onUpdateUser({name, about: description});
-        setIsLoading(false);
+
     }
 
     return (
